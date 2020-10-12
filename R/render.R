@@ -124,10 +124,11 @@ build_rmds = function(files) {
   }
 
   for (i in seq_along(files)) {
-    f = files[i]; d = dirname(f); out = output_file(f, to_md <- is_rmarkdown(f))
+    f = files[i]; d = dirname(f); out2 = output_file(f, to_md <- is_rmarkdown(f))
+    out = paste0(out2, '~')  # first generate a file that Hugo won't watch
     copy_output_yml(d)
     message('Rendering ', f, '... ', appendLF = FALSE)
-    render_page(f)
+    render_page(f, basename(out))
     x = read_utf8(out)
     x = encode_paths(x, lib1[2 * i - 1], d, base, to_md)
     move_files(lib1[2 * i - 0:1], lib2[2 * i - 0:1])
@@ -139,10 +140,10 @@ build_rmds = function(files) {
     }
 
     if (to_md) {
-      write_utf8(x, out)
+      write_utf8(x, out2)
     } else {
       if (getOption('blogdown.widgetsID', TRUE)) x = clean_widget_html(x)
-      prepend_yaml(f, out, x, callback = function(s) {
+      prepend_yaml(f, out2, x, callback = function(s) {
         if (!getOption('blogdown.draft.output', FALSE)) return(s)
         if (length(s) < 2 || length(grep('^draft: ', s)) > 0) return(s)
         append(s, 'draft: yes', 1)
@@ -152,10 +153,10 @@ build_rmds = function(files) {
   }
 }
 
-render_page = function(input, script = 'render_page.R') {
+render_page = function(input, output = NULL, script = 'render_page.R') {
   # needs --slave due to this bug in Rscript:
   # https://stat.ethz.ch/pipermail/r-devel/2018-April/075897.html
-  args = c('--slave', pkg_file('scripts', script), input, getwd())
+  args = c('--slave', pkg_file('scripts', script), input, getwd(), output)
   if (Rscript(shQuote(args)) != 0) stop("Failed to render '", input, "'")
 }
 

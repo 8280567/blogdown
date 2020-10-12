@@ -8,9 +8,10 @@ local({
   input = basename(input)
   to_md = blogdown:::is_rmarkdown(input)
   if (to_md) options(bookdown.output.markdown = TRUE, knitr.table.format = 'markdown')
+  # TODO: .markdown~
   out = rmarkdown::render(
-    input, 'blogdown::html_page', envir = globalenv(), quiet = TRUE,
-    run_pandoc = !to_md, clean = !to_md
+    input, 'blogdown::html_page', output_file = if (length(args) > 2) I(args[3]),
+    envir = globalenv(), quiet = TRUE, run_pandoc = !to_md, clean = !to_md
   )
   if (to_md) {
     file.rename(out, out2 <- blogdown:::output_file(input, to_md))

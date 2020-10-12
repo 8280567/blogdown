@@ -101,7 +101,7 @@ require_rebuild = function(html, rmd, N = getOption('blogdown.time_diff', 0)) {
 #' @export
 build_dir = function(dir = '.', force = FALSE, ignore = '[.]Rproj$') {
   for (f in list_rmds(dir)) {
-    render_it = function() render_page(f, 'render_rmarkdown.R')
+    render_it = function() render_page(f, script = 'render_rmarkdown.R')
     if (force) { render_it(); next }
     files = list.files(dirname(f), full.names = TRUE)
     files = grep(ignore, files, value = TRUE, invert = TRUE)
